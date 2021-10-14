@@ -1,0 +1,315 @@
+---
+title: "Graficando perfiles de suelo en R"
+subtitle: "Laboratorio Biofísica de Suelos"
+author: "Sara Acevedo"
+date: "`r format(Sys.time(), '%d / %m / %Y')`"
+output:
+  xaringan::moon_reader:
+    includes:
+    css: [default, metropolis, metropolis-fonts]
+nature:
+      ratio: 16:10
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+library(flipbookr)
+library(tidyverse)
+knitr::opts_chunk$set(fig.width = 5, message = FALSE, 
+                      warning = FALSE, comment = "", 
+                      cache = F, fig.retina = 5)
+```
+
+```{css, eval = TRUE, echo = FALSE}
+.remark-code{line-height: 1.2; font-size: 70%}
+@media print {
+  .has-continuation {
+    display: block;
+  }
+}
+```
+---
+name: about-me
+class: about-me-slide, inverse, middle, center
+
+# Sobre mi
+
+<img style="border-radius: 50%;" src="https://saryace.github.io/images/profile.png" width="150px"/>
+
+*Sara Acevedo*
+
+*Dr. (c) Ciencias de la Ingeniería*
+*Msc. Soil and Biogeochemistry*
+
+.fade[Pontificia Universidad Católica de Chile<br>Santiago, Chile]
+
+[`r icons::fontawesome("link")` saryace.github.io](https://saryace.github.io)
+[`r icons::fontawesome("twitter")` @saryace](https://twitter.com/saryace)
+[`r icons::icon_style(icons::fontawesome("github"), scale = 1)` @Saryace](https://github.com/Saryace)
+---
+name: about-me
+class: about-me-slide, inverse, middle, center
+
+# Sobre Soil Biophysics Lab
+
+<img style="border-radius: 50%;" src="https://static.wixstatic.com/media/a71414_85de21ba13024a48a60097ce851dae16~mv2.png" width="250px"/>
+
+*Laboratorio de Biofísica de Suelos*
+
+*PI: Dr. Carlos Bonilla*
+
+.fade[Pontificia Universidad Católica de Chile<br>Santiago, Chile]
+
+[`r icons::fontawesome("link")` biofisica.ing.puc.cl](https://biofisica.ing.puc.cl)
+[`r icons::fontawesome("twitter")` @soilbiophysics1](https://twitter.com/soilbiophysics1)
+[`r icons::icon_style(icons::fontawesome("instagram"), scale = 1)` @soilbiophysicslab](https://www.instagram.com/soilbiophysicslab)
+---
+
+class: inverse
+
+## Soil Biophysics Laboratory
+
+```{r,out.width='100%', fig.height=5,echo=FALSE,warning=FALSE,message=FALSE}
+library(leaflet)
+library(dplyr)
+
+leaflet() %>%
+  addTiles() %>%
+  addPopups(lng = -70.6149164,
+             lat =  -33.4995699,
+             popup = "Soil Biophysics Lab",
+             options = popupOptions(closeButton = FALSE)) %>% 
+  setView(lng = -70.6149164,
+          lat =  -33.4995699,
+          zoom = 17)
+
+```
+---
+class: middle
+
+## Perfiles de suelo
+
+representacion de horizontes y sus propiedades
+
+---
+class: inverse, middle, right
+
+###Ideas para este taller:
+
+###1.USDA-NRCS
+###2. Algorithms for Quantitative Pedology project [link](http://ncss-tech.github.io/AQP/)
+
+###1.Blog: Soil profiles and chronosequence with ggplot2 [link](https://bjnnowak.netlify.app/2021/08/03/r-plotting-soil-profiles)
+###2. Autor: Benjamin Nowak | 03 Aug 2021
+
+
+---
+##Para empezar, instalamos estos paquetes
+```{r, eval=FALSE}
+install.packages(c("tidyverse", #incluye ggplot2
+                   "munsell") # escala de color Munsell
+                 
+devtools::install_github("kaizadp/soilpalettes") # paleta de colores
+```
+
+##Luego, los cargamos
+```{r, eval=FALSE}
+library(c("tidyverse", #incluye ggplot2
+          "soilpalettes", # paletas de colores
+          "munsell") # escala de color Munsell
+```
+---
+
+##Creamos un dataframe de ejemplo
+
+```{r}
+datos_suelo <- data.frame(
+  suelo = c("suelo a", "suelo a", "suelo b", "suelo b"), # importante para agrupar datos
+  arena = c(15, 18, 57, 32),
+  limo = c(52, 70, 8, 26),
+  arcilla = c(33, 12, 35, 42),
+  om = c(1, 3, 4, 11),
+  bd = c(1.33, 1.38, 1.76, 1.15),
+  limite_superior = c(0,10,0,25),
+  limite_inferior = c(10,35,25,55),
+  horizontes = c("Ap","Bt", "A","B"),
+  munsell = c('5YR 3/2','5YR 7/2', '2.5YR 6/2','10YR 7/2') 
+)
+```
+
+* Arena + Limo + Arcilla = 100%
+* Variables extra, om y bd
+* limite_superior y limite_inferior deben ser continuos
+* munsell debe ser como 'character' 
+
+---
+### Con la función summary podemos ver los datos
+```{r}
+summary(datos_suelo)
+```
+---
+
+### r package {soilpalettes}
+.pull-left[
+```{r plot-label, eval=FALSE}
+library(soilpalettes)
+  # hacemos un histograma con iris
+ggplot(data = iris,
+       aes(x = Sepal.Width,
+           fill = Species)) +
+  geom_histogram(binwidth = 0.2,
+                 color = "black") +
+  theme_bw() +
+  # podzol,rendoll, alaquod, natrudoll, paletas inspiradas en colores de suelos
+  scale_fill_manual(values = soil_palette("podzol", 3)) 
+```
+]
+
+.pull-right[
+```{r plot-label-out, ref.label="plot-label", echo=FALSE}
+```
+]
+---
+
+### r package {munsell}
+.pull-left[
+```{r plot-label-2, eval=FALSE}
+library(munsell)
+plot_mnsl("5YR 3/2")
+```
+]
+
+.pull-right[
+```{r plot-label-2-out, ref.label="plot-label-2", echo=FALSE}
+```
+]
+---
+### Para graficar los perfiles, necesitamos el espesor de cada horizonte y crear colores en base a Munsell
+```{r}
+
+datos_suelo_plot <- datos_suelo %>% 
+  mutate(espesor = limite_inferior - limite_superior) %>% 
+  mutate(munsell_hex=mnsl(munsell))
+
+datos_suelo_plot
+```
+---
+### Graficamos usando geom_col
+.pull-left[
+```{r plot-label-3, eval=FALSE,warning=FALSE, message=FALSE}
+ggplot(
+  data = datos_suelo_plot,
+  aes(
+    x=suelo,y=-espesor,
+    fill=horizontes) 
+  ) +
+  geom_col(
+    width=0.2
+  ) +
+  geom_text(
+    aes(label=horizontes) # etiquetamos
+  )
+  
+```
+### error!!!, los horizontes superficiales (A y Ap) están abajo y mal rotulados 
+]
+
+.pull-right[
+```{r plot-label-3-out, ref.label="plot-label-3", echo=FALSE,warning=FALSE, message=FALSE}
+```
+]
+
+---
+### Graficamos usando geom_col, pero reordenando horizontes
+.pull-left[
+```{r plot-label-4, eval=FALSE,warning=FALSE, message=FALSE}
+ggplot(
+  data = datos_suelo_plot,
+  aes(
+    x=suelo,y=-espesor,
+    fill=fct_reorder(horizontes,limite_inferior,.desc=TRUE)) # asegurar el orden de los horizontes
+  )+
+  geom_col(
+    width=0.2
+  ) +
+  geom_text(
+    aes(y=-(limite_superior + espesor/2),label=horizontes) # se cemtra las etiquetas
+  ) +
+guides(fill=FALSE) # sacamos la leyenda
+  
+```
+]
+
+.pull-right[
+```{r plot-label-4-out, ref.label="plot-label-4", echo=FALSE,warning=FALSE, message=FALSE}
+```
+]
+
+---
+## Ahora mejoramos la visualización
+.pull-left[
+```{r plot-label-5, eval=FALSE,warning=FALSE, message=FALSE}
+ggplot(
+  data = datos_suelo_plot,
+  aes(
+    x=suelo,
+    y=-espesor,
+    fill=fct_reorder(horizontes,limite_inferior,.desc=TRUE)) # asegurar el orden de los horizontes
+  )+
+  geom_col(
+    width=0.2
+  ) +
+  geom_text(
+    aes(y=-(limite_superior + espesor/2),label=horizontes) # se cemtra las etiquetas
+  ) +
+guides(fill=FALSE) +  # sacamos la leyenda
+scale_fill_manual( # se definen los colores munsell
+  breaks=datos_suelo_plot$horizontes,
+  values=datos_suelo_plot$munsell_hex) +
+scale_y_continuous(labels = abs) + # profundidad con valores positivos
+labs(
+title = "Suelos muestreados",
+y = "Profundidad (cm)",
+x=""
+  ) +
+geom_hline(yintercept = -45, color = "blue") + # agregamos una linea
+geom_text(aes(x = -Inf, y=-44, hjust = 0),label=" tabla de agua", color = "blue") + # describimos la linea
+theme_bw()
+
+  
+```
+]
+
+.pull-right[
+```{r plot-label-5-out, ref.label="plot-label-5", echo=FALSE,warning=FALSE, message=FALSE}
+```
+]
+
+---
+`r chunk_reveal(chunk_name = "plot-label-5", title = "###Paso a paso")`
+---
+
+.pull-left[
+### {munsell} y {soilpalettes}
+1. Fácil de usar
+2. Colores personalizados para suelos
+]
+
+.pull-right[
+### {ggplot2} 
+1. Revisar el orden de las columnas!
+2. Muy flexible para colores y formas
+
+]
+---
+
+class: goodbye-slide, inverse, middle, right
+
+### Dudas? Comentarios? Puedes contactarnos en:
+
+.left[
+[`r icons::fontawesome("link")` biofisica.ing.puc.cl](https://biofisica.ing.puc.cl)
+[`r icons::fontawesome("twitter")` @soilbiophysics1](https://twitter.com/soilbiophysics1)
+[`r icons::icon_style(icons::fontawesome("instagram"), scale = 1)` @soilbiophysicslab](https://www.instagram.com/soilbiophysicslab)
+]
