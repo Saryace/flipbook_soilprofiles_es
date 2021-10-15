@@ -59,6 +59,10 @@ class: about-me-slide, inverse, middle, center
 
 *PI: Dr. Carlos Bonilla*
 
+
+
+nuevo texto
+
 .fade[Pontificia Universidad Católica de Chile<br>Santiago, Chile]
 
 [`r icons::fontawesome("link")` biofisica.ing.puc.cl](https://biofisica.ing.puc.cl)
