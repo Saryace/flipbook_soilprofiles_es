@@ -247,6 +247,8 @@ guides(fill=FALSE) # sacamos la leyenda
 ]
 
 ---
+
+
 ## Ahora mejoramos la visualización
 .pull-left[
 ```{r plot-label-5, eval=FALSE,warning=FALSE, message=FALSE}
